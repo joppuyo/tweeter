@@ -8,7 +8,13 @@ $cache = new Illuminate\Cache\FileStore(new Illuminate\Filesystem\Filesystem(), 
 
 $container['cache'] = $cache;
 
+$container['httpCache'] = function () {
+    return new \Slim\HttpCache\CacheProvider();
+};
+
 $app = new Slim\App($container);
+
+$app->add(new \Slim\HttpCache\Cache());
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -18,6 +24,9 @@ $app->get('/api', function(Request $request, Response $response, $arguments) {
     $cachedTweets = $this->cache->get('tweets');
 
     if ($cachedTweets) {
+        if (ETAG_ENABLED) {
+            $response = $this->httpCache->withEtag($response, md5(json_encode($cachedTweets)));
+        }
         return $response->withJson($cachedTweets, 200, JSON_PRETTY_PRINT);
     }
 
@@ -28,6 +37,10 @@ $app->get('/api', function(Request $request, Response $response, $arguments) {
 
     if (CACHE_ENABLED) {
         $this->cache->put('tweets', $tweets, CACHE_LIFETIME);
+    }
+
+    if (ETAG_ENABLED) {
+        $response = $this->httpCache->withEtag($response, md5(json_encode($tweets)));
     }
 
     return $response->withJson($tweets, 200, JSON_PRETTY_PRINT);
