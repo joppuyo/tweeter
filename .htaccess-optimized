@@ -306,3 +306,8 @@ AddDefaultCharset utf-8
     ExpiresByType text/x-cross-domain-policy            "access plus 1 week"
 
 </IfModule>
+
+# Work around Apache bug that adds gzip suffix to gzipped files, causing backend not to recognize if-none-match header
+# from the browser. See: https://bz.apache.org/bugzilla/show_bug.cgi?id=45023#c22
+
+RequestHeader edit "If-None-Match" '^"((.*)-gzip)"$' '"$1", "$2"'
