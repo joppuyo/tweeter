@@ -12,6 +12,15 @@ $container['httpCache'] = function () {
     return new \Slim\HttpCache\CacheProvider();
 };
 
+$container['view'] = function ($c) {
+    $view = new \Slim\Views\Twig('templates');
+
+    // Instantiate and add Slim specific extension
+    $basePath = $c['request']->getUri();
+    $view->addExtension(new Slim\Views\TwigExtension($c['router'], $basePath));
+    return $view;
+};
+
 $app = new Slim\App($container);
 
 $app->add(new \Slim\HttpCache\Cache());
@@ -47,7 +56,10 @@ $app->get('/api', function(Request $request, Response $response, $arguments) {
 });
 
 $app->get('/', function(Request $request, Response $response, $arguments) {
-
+    return $this->view->render($response, 'template.twig', [
+        'minifyAssets' => MINIFY_ASSETS,
+        'searchUsername' => TWITTER_SEARCH_USERNAME
+    ]);
 });
 
 $app->run();

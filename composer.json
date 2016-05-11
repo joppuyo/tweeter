@@ -5,6 +5,8 @@
         "symfony/var-dumper": "^3.0",
         "illuminate/cache": "^5.2",
         "illuminate/filesystem": "^5.2",
-        "slim/http-cache": "^0.3.0"
+        "slim/http-cache": "^0.3.0",
+        "slim/twig-view": "^2.1",
+        "illuminate/support": "^5.2"
     }
 }
